@@ -3,6 +3,7 @@ import database
 import random
 import time
 import csv
+
 # define a function called initializing
 my_DB = database.DB()
 
@@ -67,7 +68,20 @@ def admin_commands():
             print('4. Changes role')
             print('5. Add student or remove student')
             print('6. Add or remove project')
-            print('7. Exit')
+            print('Type exit to exit')
+            if user_input == 1:
+                view_student()
+            elif user_input == 2:
+                view_project()
+            elif user_input == 3:
+                view_member()
+            elif user_input == 4:
+                change_role_or_add_admin()
+            elif user_input == 5:
+                add_remove_student()
+            elif user_input == 6:
+                add_remove_project()
+def
 
 
 def view_student():
@@ -110,7 +124,6 @@ def add_remove_student():
                 time.sleep(3)
                 print('Student Removed')
 
-
     if user_add_remove == 'add':
         new_student = {}
         new_student['ID'] = str(random.randint(1111111, 9999999))
@@ -124,8 +137,36 @@ def add_remove_student():
 
 
 def add_remove_project():
+    user_input = input('Add or remove project? (Type add/remove): ')
+    if user_input == 'Remove':
+        remove_id = input('Enter Project ID: ')
+        for i in my_DB.search('project').table:
+            if i['ProjectID'] == remove_id:
+                my_DB.search('project').table.pop(
+                    my_DB.search('project').table.index(i))
+                print('Removing...')
+                time.sleep(3)
+                print('Project Removed')
 
 
+def change_role_or_add_admin():
+    user_input = input('Change role in class or add people to project: ')
+    if user_input == 'class':
+        student_id = input('Enter ID: ')
+        new_role = input('Enter Type: ')
+        for i in my_DB.search('persons').table:
+            if student_id == i['ID']:
+                i['type'] = new_role
+    if user_input == 'project':
+        project_id = input('Enter Project ID: ')
+        student_id = input('Enter Student ID: ')
+        for i in my_DB.search('project').table:
+            if i['ProjectID'] == project_id:
+                if student_id in my_DB.search('project').table.index(i):
+                    print('What role you wanna change it to?')
+                    print("1. Lead")
+                    print("2. Member1")
+                    print("3. Member2")
 
 
 # here are things to do in this function:
@@ -160,8 +201,8 @@ val = login()
 
 if val[1] == 'admin':
     admin_commands()
-    # see and do admin related activities
-# elif val[1] = 'student':
+elif val[1] == 'student':
+
 # see and do student related activities
 # elif val[1] = 'member':
 # see and do member related activities
