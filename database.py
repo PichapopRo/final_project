@@ -15,20 +15,6 @@ def read_csv(csv_file):
 
 
 # add in code for a Database class
-class Database:
-    def __init__(self, database1=None):
-        if database1 is None:
-            database1 = []
-        self.database = database1
-
-    def insert(self, table):
-        self.database.append(table)
-
-    def search(self, table_search):
-        for i in self.database:
-            if i.table_search == table_search:
-                return Table
-        return None
 
 
 # add in code for a Table class
@@ -74,6 +60,11 @@ class Table:
                     dict_temp[key] = i[key]
             just_list_again.append(dict_temp)
         return just_list_again
+
+    def print(self):
+        for i in self.table:
+            print(i)
+        return self
 
     def __str__(self):
         return self.table_name + ':' + str(self.table)
