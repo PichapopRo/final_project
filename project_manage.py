@@ -55,118 +55,119 @@ def login():
         return None
 
 
-def admin_commands():
-    print('/help to view every commands')
-    while True:
-        user_input = int(input('Input Number: '))
-        if user_input == 'exit':
-            break
-        if user_input == '/help':
-            print('1. View every student')
-            print('2. View every project')
-            print('3. View project member')
-            print('4. Changes role')
-            print('5. Add student or remove student')
-            print('6. Add or remove project')
-            print('Type exit to exit')
-            if user_input == 1:
-                view_student()
-            elif user_input == 2:
-                view_project()
-            elif user_input == 3:
-                view_member()
-            elif user_input == 4:
-                change_role_or_add_admin()
-            elif user_input == 5:
-                add_remove_student()
-            elif user_input == 6:
-                add_remove_project()
-def
+import time
+import random
 
+class Admin:
+    def __init__(self, my_DB):
+        self.my_DB = my_DB
 
-def view_student():
-    for i in my_DB.search('persons').table:
-        print(
-            f"ID: {i['ID']} Full name: {i['fist']} {i['last']} Type: {i['type']}")
+    def admin_commands(self):
+        print('/help to view every commands')
+        while True:
+            user_input = input('Input Number: ')
+            if user_input == 'exit':
+                break
+            if user_input == '/help':
+                self.display_commands()
+            elif user_input == '1':
+                self.view_student()
+            elif user_input == '2':
+                self.view_project()
+            elif user_input == '3':
+                self.view_member()
+            elif user_input == '4':
+                self.change_role_or_add_admin()
+            elif user_input == '5':
+                self.add_remove_student()
+            elif user_input == '6':
+                self.add_remove_project()
 
+    def display_commands(self):
+        print('1. View every student')
+        print('2. View every project')
+        print('3. View project member')
+        print('4. Changes role')
+        print('5. Add student or remove student')
+        print('6. Add or remove project')
+        print('Type exit to exit')
 
-def view_project():
-    num_project = 1
-    for i in my_DB.search('project').table:
-        print(f'{num_project}. Title: {i["Title"]} Project: {i["ProjectID"]}')
-        num_project += 1
+    def view_student(self):
+        for i in self.my_DB.search('persons').table:
+            print(f"ID: {i['ID']} Full name: {i['fist']} {i['last']} Type: {i['type']}")
 
+    def view_project(self):
+        num_project = 1
+        for i in self.my_DB.search('project').table:
+            print(f'{num_project}. Title: {i["Title"]} Project: {i["ProjectID"]}')
+            num_project += 1
 
-def view_member():
-    project_id_input = input('Enter Project ID: ')
-    for i in my_DB.search('project').table:
-        member_checker1 = i['Member1']
-        member_checker2 = i['Member2']
-        if member_checker1 == '':
-            member_checker1 = 'No one'
-        if member_checker2 == '':
-            member_checker2 = 'No one'
-        if i['ProjectID'] == project_id_input:
-            print(
-                f"Lead: {i['Lead']} Member1: {member_checker1} Member2: {member_checker2} ")
-            print(f"Advisor: {i['Adviser']} Status: {i['Status']}")
+    def view_member(self):
+        project_id_input = input('Enter Project ID: ')
+        for i in self.my_DB.search('project').table:
+            member_checker1 = i['Member1'] if i['Member1'] else 'No one'
+            member_checker2 = i['Member2'] if i['Member2'] else 'No one'
+            if i['ProjectID'] == project_id_input:
+                print(f"Lead: {i['Lead']} Member1: {member_checker1} Member2: {member_checker2} ")
+                print(f"Advisor: {i['Adviser']} Status: {i['Status']}")
 
+    def add_remove_student(self):
+        user_add_remove = input('add or remove: ')
+        if user_add_remove == 'remove':
+            student_id = input("Enter Student ID: ")
+            for i in self.my_DB.search('persons').table:
+                if i['ID'] == student_id:
+                    self.my_DB.search('persons').table.remove(i)
+                    print('Removing...')
+                    time.sleep(3)
+                    print('Student Removed')
 
-def add_remove_student():
-    user_add_remove = input('add or remove: ')
-    if user_add_remove == 'remove':
-        student_id = str(input("Enter Student ID: "))
-        for i in my_DB.search('persons').table:
-            if i['ID'] == student_id:
-                my_DB.search('persons').table.pop(
-                    my_DB.search('persons').table.index(i))
-                print('Removing...')
-                time.sleep(3)
-                print('Student Removed')
+        elif user_add_remove == 'add':
+            new_student = {}
+            new_student['ID'] = str(random.randint(1111111, 9999999))
+            new_student['fist'] = input("Enter Student Firstname: ")
+            new_student['last'] = input("Enter Student lastname: ")
+            new_student['type'] = input("Enter Student Type: ")
+            self.my_DB.search('persons').table.append(new_student)
+            print("Adding...")
+            time.sleep(3)
+            print("Student Added.")
 
-    if user_add_remove == 'add':
-        new_student = {}
-        new_student['ID'] = str(random.randint(1111111, 9999999))
-        new_student['fist'] = input("Enter Student Firstname: ")
-        new_student['last'] = input("Enter Student lastname: ")
-        new_student['Type'] = input("Enter Student Type: ")
-        my_DB.search('persons').table.append(new_student)
-        print("Adding...")
-        time.sleep(3)
-        print("Student Added.")
+    def add_remove_project(self):
+        user_input = input('Add or remove project? (Type add/remove): ')
+        if user_input.lower() == 'remove':
+            remove_id = input('Enter Project ID: ')
+            for i in self.my_DB.search('project').table:
+                if i['ProjectID'] == remove_id:
+                    self.my_DB.search('project').table.remove(i)
+                    print('Removing...')
+                    time.sleep(3)
+                    print('Project Removed.')
 
+    def change_role_or_add_admin(self):
+        user_input = input('Change role in class or add people to project: ')
+        if user_input.lower() == 'class':
+            student_id = input('Enter ID: ')
+            new_role = input('Enter Type: ')
+            for i in self.my_DB.search('persons').table:
+                if student_id == i['ID']:
+                    i['type'] = new_role
+        elif user_input.lower() == 'project':
+            project_id = input('Enter Project ID: ')
+            student_id = input('Enter Student ID: ')
+            for i in self.my_DB.search('project').table:
+                if i['ProjectID'] == project_id:
+                    if student_id in i.values():
+                        print('What role you wanna change it to?')
+                        print("1. Lead")
+                        print("2. Member1")
+                        print("3. Member2")
 
-def add_remove_project():
-    user_input = input('Add or remove project? (Type add/remove): ')
-    if user_input == 'Remove':
-        remove_id = input('Enter Project ID: ')
-        for i in my_DB.search('project').table:
-            if i['ProjectID'] == remove_id:
-                my_DB.search('project').table.pop(
-                    my_DB.search('project').table.index(i))
-                print('Removing...')
-                time.sleep(3)
-                print('Project Removed')
+# Usage
+# Assuming my_DB is an instance of your database class
+# admin_instance = Admin(my_DB)
+# admin_instance.admin_commands()
 
-
-def change_role_or_add_admin():
-    user_input = input('Change role in class or add people to project: ')
-    if user_input == 'class':
-        student_id = input('Enter ID: ')
-        new_role = input('Enter Type: ')
-        for i in my_DB.search('persons').table:
-            if student_id == i['ID']:
-                i['type'] = new_role
-    if user_input == 'project':
-        project_id = input('Enter Project ID: ')
-        student_id = input('Enter Student ID: ')
-        for i in my_DB.search('project').table:
-            if i['ProjectID'] == project_id:
-                if student_id in my_DB.search('project').table.index(i):
-                    print('What role you wanna change it to?')
-                    print("1. Lead")
-                    print("2. Member1")
-                    print("3. Member2")
 
 
 # here are things to do in this function:
@@ -176,13 +177,12 @@ def change_role_or_add_admin():
 
 # define a function called exit
 def exit():
-    myFile = open('demo_file.csv', 'w')
+    myFile = open('login.csv', 'w')
     writer = csv.writer(myFile)
-    writer.writerow(['Name', 'Roll', 'Language'])
-    for dictionary in listOfDict:
+    writer.writerow(['ID', 'username', 'password', 'Role'])
+    for dictionary in my_DB.database:
         writer.writerow(dictionary.values())
     myFile.close()
-    pass
 
 
 # here are things to do in this function:
@@ -200,7 +200,7 @@ val = login()
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
 if val[1] == 'admin':
-    admin_commands()
+
 elif val[1] == 'student':
 
 # see and do student related activities
