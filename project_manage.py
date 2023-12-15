@@ -43,7 +43,7 @@ def initializing():
 # define a function called login
 
 def login():
-    print('Please, enter your username or password.')
+    print('Enter your username and password.')
     username = input('Enter Username: ')
     password = input('Enter your password: ')
     for i in my_DB.search('login').table:
@@ -52,13 +52,14 @@ def login():
                 f"Hello, {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['fist']}"
                 f" {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['last']}")
             return i['ID'], i['role']
+    print('Invalid username or password. Try again.')
     return None
 
 
-def admin_commands():
+def admin():
     print('/help to view every commands')
     while True:
-        user_input = int(input('Input Number: '))
+        user_input = input('Input Number: ')
         if user_input == 'exit':
             break
         if user_input == '/help':
@@ -69,31 +70,149 @@ def admin_commands():
             print('5. Add student or remove student')
             print('6. Add or remove project')
             print('Type exit to exit')
-            if user_input == 1:
-                view_student()
-            elif user_input == 2:
-                view_project()
-            elif user_input == 3:
-                view_member()
-            elif user_input == 4:
-                change_role_or_add_admin()
-            elif user_input == 5:
-                add_remove_student()
-            elif user_input == 6:
-                add_remove_project()
+        if user_input == '1':
+            view_student()
+        elif user_input == '2':
+            view_project()
+        elif user_input == '3':
+            view_member()
+        elif user_input == '4':
+            change_role_or_add_admin()
+        elif user_input == '5':
+            add_remove_student()
+        elif user_input == '6':
+            add_remove_project()
 
 
 def student():
-    have_project = False
-    if user_id in my_DB.search('project'):
-        have_project = True
-    if have_project:
-        edit_project()
-        pass
-        # Edit Project
-    else:
-        create_project()
+    while True:
+        have_project = False
+        notification = 0
+        if user_id in my_DB.search('project').table:
+            have_project = True
+        for i in my_DB.search('member_request').table:
+            if i['to_be_member'] == user_id:
+                notification += 1
+        if have_project:
+            if notification == 0:
+                print(f"You don't have any notification")
+            else:
+                print(f"You have {notification} notifications.")
+            for j in my_DB.search('project').table:
+                if j['Lead'] == user_id:
+                    print("What's on your thoughts?")
+                    user_input = input("(edit / notification / exit / response): ")
+                else:
+                    print("What's on your thoughts?")
+                    user_input = input("(view info / notification / exit): ")
+                if user_input == 'edit':
+                    print('What would you like to edit?')
+                    edit_input = input('(Member1, Member2): ')
+                    if edit_input == 'Member1':
+                        new_member = input('Enter ID: ')
+                        for i in my_DB.search('project').table:
+                            if i['ProjectID'] == project_ID:
+                                i['Member1'] = new_member
+                    if edit_input == 'Member2':
+
+                        for i in my_DB.search('persons').filter(lambda x: x['type'] == 'student').table:
+                            print(f"{i['ID']} {i['fist']} {i['last']}")
+                        while True:
+                            new_member = input('Enter ID: ')
+                            if new_member not in my_DB.search('project').table:
+                                break
+                        for i in my_DB.search('project').table:
+                            if i['ProjectID'] == project_ID:
+                                i['Member2'] = new_member
+                    # Edit Project
+                    edit_project(user_id)
+                if user_input == 'exit':
+                    break
+                if user_input == 'view member':
+                    for _ in my_DB.search('project').table:
+                        if _['Lead'] == user_id or _['Member1'] == user_id or _['Member2'] == user_id:
+                            print(f"Project ID: {_['ProjectID']}")
+                            print(f"Project Title: {_['Title']}")
+                            for i in my_DB.search('persons').table:
+                                if i['ID'] == _['Lead']:
+                                    print(f"Lead: {_['Lead']} {i['fist']} {i['last']}")
+                                if i['ID'] == _['Member1']:
+                                    print(f"Member1: {_['Member1']} {i['fist']} {i['last']}")
+                                if i['ID'] == _['Member2']:
+                                    print(f"Member2: {_['Member2']} {i['fist']} {i['last']}")
+                                if i['ID'] == _['Advisor']:
+                                    print(f"Advisor: {_['Advisor']} {i['fist']} {i['last']}")
+                if user_input == 'notification':
+                    if notification > 0:
+                        print('Notifications')
+                        for i in my_DB.search('member_request').table:
+                            if i['to_be_member'] == user_id:
+                                for j in my_DB.search('project').table:
+                                    counter = 1
+                                    if j['ProjectID'] == i['ProjectID']:
+                                        print(f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                        counter += 1
+                    if notification == 0:
+                        print("I told you. You don't have any notification"
+                              "haiyaaa...")
+        if not have_project:
+            print("Looks like you don't have a project...")
+            if notification == 0:
+                print("You don't have any notification.")
+            else:
+                print(f"You have {notification} notifications")
+            print("What's on your thoughts?")
+            user_input = input("(create project / notification / exit): ")
+            if user_input == 'create project':
+                create_project()
+            if user_input == 'exit':
+                break
+            if user_input == 'notification':
+                if notification > 0:
+                    print('Notification')
+                    for i in my_DB.search('member_request').table:
+                        if i['to_be_member'] == user_id:
+                            for j in my_DB.search('project').table:
+                                counter = 1
+                                if j['ProjectID'] == i['ProjectID']:
+                                    print(f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                    counter += 1
+                if notification == 0:
+                    print("I told you. You don't have any notification la "
+                          "haiyaaa...")
+
+
+
         # create project
+def response_request(type):
+    if type == 'student':
+        for _ in my_DB.search('member_request').table:
+            if _['to_be_member'] == user_id:
+                for j in my_DB.search('project').table:
+                    if j['ProjectID'] == _['ProjectID']:
+                        print(
+                            f"{j['ProjectID']} {j['Title']}.")
+                print(f"{_['ProjectID']} {_['Title']}")
+        project_id = input("Enter Project ID: ")
+        response = input("What's your response?: ")
+        for i in my_DB.search('member_request').table:
+            if i['to_be_member'] == user_id and i['ProjectID'] == project_id:
+                i['Response'] = response
+            for j in my_DB.search('project').table:
+                if j['ProjectID'] == project_id:
+                    if j['Member1'] == '':
+                        j['Member1'] = user_id
+                    else:
+                        j['Member2'] = user_id
+    if type == 'faculty':
+        project_id = input("Enter Project ID: ")
+        response = input("What's your response?: ")
+        for i in my_DB.search('advisor_request').table:
+            if i['to_be_member'] == user_id and i['ProjectID'] == project_id:
+                i['Response'] = response
+            for j in my_DB.search('project').table:
+                if j['ProjectID'] == project_id:
+                    j['advisor'] = user_id
 
 
 def create_project():
@@ -117,29 +236,42 @@ def create_project():
     print("Adding...")
     time.sleep(1)
     print("Project Created.")
-    my_DB.search('member_request').print()
 
 
 def invite_user(Project_ID, type):
     # ProjectID, to_be_member, Response, Response_date
-    my_DB.search('persons').filter(lambda x: x['type'] == type).print()
-    student_id = input(f'Enter {type} ID: ')
-    new_member_request = {}
-    new_member_request['ProjectID'] = Project_ID
-    new_member_request['to_be_member'] = student_id
-    new_member_request['Response'] = 'Pending'
-    new_member_request['Response_date'] = ''
-    my_DB.search('member_request').table.append(new_member_request)
+    for i in my_DB.search('persons').filter(lambda x: x['type'] == type).table:
+        print(f"{i['ID']} {i['fist']} {i['last']}")
+    member_id = input(f'Enter {type} ID: ')
+    if type == 'student':
+        new_member_request = {}
+        new_member_request['ProjectID'] = Project_ID
+        new_member_request['to_be_member'] = member_id
+        new_member_request['Response'] = 'Pending'
+        new_member_request['Response_date'] = ''
+        my_DB.search('member_request').table.append(new_member_request)
+    if type == 'faculty':
+        new_member_request = {}
+        new_member_request['ProjectID'] = Project_ID
+        new_member_request['to_be_adviser'] = member_id
+        new_member_request['Response'] = 'Pending'
+        new_member_request['Response_date'] = ''
+        my_DB.search('member_request').table.append(new_member_request)
 
 
-def edit_project():
-
+def edit_project(ID):
+    print('What would you like to edit?')
+    for i in my_DB.search('project').table:
+        if i['Lead'] == ID or i['Member1'] == ID or i['Member2'] == ID:
+            user_input = input('What would you like to edit?: ')
+            if user_input == 'title' or user_input == 'Title':
+                i['Title'] = input('Enter new title: ')
 
 
 def view_student():
     for i in my_DB.search('persons').table:
         print(
-            f"ID: {i['ID']} Full name: {i['fist']} {i['last']} Type: {i['type']}")
+            f"ID: {i['ID']} Fullname: {i['fist']} {i['last']} Type: {i['type']}")
 
 
 def view_project():
@@ -184,7 +316,7 @@ def add_remove_student():
         new_student['Type'] = input("Enter Student Type: ")
         my_DB.search('persons').table.append(new_student)
         print("Adding...")
-        time.sleep(2)
+        time.sleep(1)
         print("Student Added.")
 
 
@@ -197,7 +329,7 @@ def add_remove_project():
                 my_DB.search('project').table.pop(
                     my_DB.search('project').table.index(i))
                 print('Removing...')
-                time.sleep(3)
+                time.sleep(1)
                 print('Project Removed')
 
 
@@ -246,14 +378,17 @@ def exit():
 
 
 # make calls to the initializing and login functions defined above
-
 initializing()
 val = login()
 user_id = val[0]
+project_ID = ''
+for _ in my_DB.search('project').table:
+    if _['Lead'] == user_id or _['Member1'] == user_id or _['Member2'] == user_id:
+        project_ID = _['ProjectID']
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
 if val[1] == 'admin':
-    admin_commands()
+    admin()
 elif val[1] == 'student':
     student()
 # see and do student related activities

@@ -24,3 +24,6 @@ ID,username,password,role
 4720327,David.A,3861,faculty
 7525643,Henrikh.M,2636,faculty
 2472659,Karim.B,3828,faculty
+1234567,s,1234,student
+1234568,f,1234,faculty
+1234569,a,1234,admin

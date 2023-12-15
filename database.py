@@ -82,3 +82,4 @@ class DB:
             if table.table_name == table_name:
                 return table
         return None
+
