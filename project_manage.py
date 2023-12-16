@@ -13,6 +13,7 @@ def initializing():
     my_DB.read_csv('login', 'login.csv')
     my_DB.read_csv('project', 'project.csv')
     my_DB.read_csv('request', 'request.csv')
+    my_DB.read_csv('workload', 'workload,csv')
 
 
 # here are things to do in this function:
@@ -76,7 +77,7 @@ def student():
         notification = 0
         if user_id in my_DB.search('project').select(
                 ['Lead']) or user_id in my_DB.search('project').select(
-                ['Member1']) or my_DB.search('project').select(['Member2']):
+            ['Member1']) or my_DB.search('project').select(['Member2']):
             have_project = True
         for student_record in my_DB.search('request').table:
             print(student_record)
@@ -233,7 +234,8 @@ def faculty():
                         print(f"Project ID: {i['ProjectID']}")
                         for j in my_DB.search('persons').table:
                             if i['Lead'] == j['ID']:
-                                print(f"Lead: {j['ID']} {j['fist']} {j['last']}")
+                                print(
+                                    f"Lead: {j['ID']} {j['fist']} {j['last']}")
                         for j in my_DB.search('persons').table:
                             if i['Member1'] == j['ID']:
                                 print(f": {j['ID']} {j['fist']} {j['last']}")
@@ -420,15 +422,9 @@ def view_project():
 def view_member():
     project_id_input = input('Enter Project ID: ')
     for i in my_DB.search('project').table:
-        member_checker1 = i['Member1']
-        member_checker2 = i['Member2']
-        if member_checker1 == '':
-            member_checker1yes = 'No one'
-        if member_checker2 == '':
-            member_checker2yes = 'No one'
         if i['ProjectID'] == project_id_input:
             print(
-                f"Lead: {i['Lead']} Member1: {member_checker1yes} Member2: {member_checker2yes} ")
+                f"Lead: {i['Lead']} Member1: {i['Member1']} Member2: {i['Member1']} ")
             print(f"Advisor: {i['Adviser']} Status: {i['Status']}")
 
 
@@ -476,6 +472,51 @@ def change_project_status():
             status_input = input('Status: ')
             i['Status'] = status_input
 
+def workload_giver():
+    new_workload = {}
+    new_workload['ProjectID'] = project_ID
+    new_workload['WorkID'] = str(random.randint(1111111, 9999999))
+    new_workload['Title'] = input('Input work title: ')
+    for i in my_DB.search('project'):
+        if i['ProjectID'] == project_ID:
+            for j in my_DB.search('persons').table:
+                if i['Lead'] == j['ID']:
+                    print(
+                        f"Lead: {j['ID']} {j['fist']} {j['last']}")
+            for j in my_DB.search('persons').table:
+                if i['Member1'] == j['ID']:
+                    print(f": {j['ID']} {j['fist']} {j['last']}")
+            for j in my_DB.search('persons').table:
+                if i['Member2'] == j['ID']:
+                    print(f": {j['ID']} {j['fist']} {j['last']}")
+    new_workload['Handler'] = input('Enter member ID: ')
+    new_workload['deadline'] = input('Enter deadline')
+    new_workload['Status'] = 'Assigned'
+
+
+def change_workload_status():
+    for i in my_DB.search('workload').table:
+        if i['ProjectID'] == project_ID and i['Handler'] == user_id:
+            print(f"Workload ID: {i['WorkID']} Title: {i['Title']}")
+            i['status'] = input('Enter Status: ')
+        else:
+            print("Work not found.")
+
+def view_workload():
+    for i in my_DB.search('workload').table:
+        if i['ProjectID'] == project_ID and i['Handler'] == user_id:
+            print(f"Workload ID: {i['WorkID']} Title: {i['Title']}")
+        else:
+            print('Congrats! There are no work for you.')
+
+
+def view_project_workload():
+    for i in my_DB.search('workload').table:
+        if i['ProjectID'] == project_ID:
+            print('')
+
+
+
 
 # here are things to do in this function:
 # add code that performs a login task
@@ -503,8 +544,7 @@ val = login()
 user_id = val[0]
 project_ID = ''
 for _ in my_DB.search('project').table:
-    if _['Lead'] == user_id or _['Member1'] == user_id or _[
-        'Member2'] == user_id:
+    if _['Lead'] == user_id or _['Member1'] == user_id or _['Member2'] == user_id or _['Advisor'] == user_id:
         project_ID = _['ProjectID']
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
