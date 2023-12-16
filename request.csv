@@ -1,1 +1,4 @@
-ProjectID,MemberID,Type,Response,Response_date
+Type,ProjectID,MemberID,Response,Response_date
+to_be_member,3331038,1228464,Pending,
+to_be_member,3331038,7998314,Pending,
+to_be_advisor,3331038,2472659,Pending,

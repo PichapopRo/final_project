@@ -5,6 +5,7 @@ import csv, os
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+
 def read_csv(csv_file):
     persons = []
     with open(os.path.join(__location__, f'{csv_file}')) as f:
@@ -55,7 +56,7 @@ class Table:
         just_list_again = []
         for i in self.table:
             for attribute in attribute_list:
-                just_list_again.append(i[attribute])    
+                just_list_again.append(i[attribute])
         return just_list_again
 
     def print(self):
@@ -81,7 +82,7 @@ class DB:
             if table.table_name == table_name:
                 return table
         return None
-    
+
     def read_csv(self, table_name, file_name):
         data_list = []
         with open(os.path.join(__location__, f'{file_name}')) as f:
@@ -91,15 +92,14 @@ class DB:
         tb = Table(table_name, data_list)
         self.insert(tb, file_name)
         return self
-    
-    def write_csv(self):
-        for i,tb in enumerate(self.database):
-            if tb.table.__len__() > 0:
-                with open(os.path.join(__location__, self.csv_filename[i]),'w', newline='') as f:
-                    writer = csv.DictWriter(f, fieldnames=tb.table[0].keys())
-                    writer.writeheader()
-                    for row in tb.table:
-                        writer.writerow(row)
-            return self
-    
 
+    def write_csv(self, name, list_dict):
+        if not list_dict:
+            with open(name, 'w', newline='', encoding='utf-8') as myFile:
+                return  # replace with nothing
+        with open(name, 'w', newline='', encoding='utf-8') as myFile:
+            writer = csv.writer(myFile)
+            row = [x for x in list_dict[0].keys()]
+            writer.writerow(row)
+            for dictionary in list_dict:
+                writer.writerow(dictionary.values())

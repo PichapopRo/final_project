@@ -167,7 +167,7 @@ def faculty():
         # Have project
         if have_project:
             print("Select function: ")
-            user_input = input('')
+            user_input = input('d')
 
 
 
@@ -365,9 +365,10 @@ def change_role_or_add_admin():
 
 # define a function called exit
 def exit():
-    my_DB.write_csv()
-
-
+    my_DB.write_csv('persons.csv', my_DB.search('persons').table)
+    my_DB.write_csv('login.csv', my_DB.search('login').table)
+    my_DB.write_csv('project.csv', my_DB.search('project').table)
+    my_DB.write_csv('request.csv', my_DB.search('request').table)
 # here are things to do in this function:
 # write out all the tables that have been modified to the corresponding csv files
 # By now, you know how to read in a csv file and transform it into a list of dictionaries. For this project, you also need to know how to do the reverse, i.e., writing out to a csv file given a list of dictionaries. See the link below for a tutorial on how to do this:
