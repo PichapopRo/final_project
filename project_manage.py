@@ -2,17 +2,17 @@
 import database
 import random
 import time
+import datetime
 
-# define a function called initializing
 my_DB = database.DB()
+time_atm = datetime.datetime.now()
 
 
 def initializing():
-    my_DB.read_csv('persons','persons.csv')
-    my_DB.read_csv('login','login.csv')
-    my_DB.read_csv('project','project.csv')
+    my_DB.read_csv('persons', 'persons.csv')
+    my_DB.read_csv('login', 'login.csv')
+    my_DB.read_csv('project', 'project.csv')
     my_DB.read_csv('request', 'request.csv')
-    
 
 
 # here are things to do in this function:
@@ -52,7 +52,7 @@ def admin():
             print('1. View every student')
             print('2. View every project')
             print('3. View project member')
-            print('4. Changes role')
+            print('4. Changes project status')
             print('5. Add student or remove student')
             print('6. Add or remove project')
             print('Type exit to exit')
@@ -63,7 +63,7 @@ def admin():
         elif user_input == '3':
             view_member()
         elif user_input == '4':
-            change_role_or_add_admin()
+            change_project_status()
         elif user_input == '5':
             add_remove_student()
         elif user_input == '6':
@@ -74,7 +74,9 @@ def student():
     while True:
         have_project = False
         notification = 0
-        if user_id in my_DB.search('project').select(['Lead']) or user_id in my_DB.search('project').select(['Member1']) or my_DB.search('project').select(['Member2']):
+        if user_id in my_DB.search('project').select(
+                ['Lead']) or user_id in my_DB.search('project').select(
+                ['Member1']) or my_DB.search('project').select(['Member2']):
             have_project = True
         for student_record in my_DB.search('request').table:
             print(student_record)
@@ -88,69 +90,94 @@ def student():
             for j in my_DB.search('project').table:
                 if j['Lead'] == user_id:
                     print("Select function")
-                    user_input = input("(edit / notification / exit / response): ")
+                    print('1. Edit')
+                    print('2. Notification')
+                    print('3. Response')
+                    print('4. Remove project')
+                    print('exit')
+                    user_input = input("Input number: ")
+                    if user_input == '1':
+                        edit_project(user_id)
                 else:
                     print("Select function")
-                    user_input = input("(view info / notification / exit / response): ")
+                    print("1. View project's info")
+                    print('2. Notification')
+                    print('3. Response')
+                    print('exit')
+                    user_input = input("Input number: ")
                 if user_input == 'exit':
                     return
-                if user_input == 'response':
+                if user_input == '3':
                     response_request('student')
-                if user_input == 'edit':
-                    # Edit Project
-                    edit_project(user_id)
-                if user_input == 'view member':
+                    if response_request('student') == '':
+                        print("You don't have any request to response.")
+                if user_input == '1':
                     for _ in my_DB.search('project').table:
-                        if _['Lead'] == user_id or _['Member1'] == user_id or _['Member2'] == user_id:
+                        if _['Lead'] == user_id or _['Member1'] == user_id or \
+                                _['Member2'] == user_id:
                             print(f"Project ID: {_['ProjectID']}")
                             print(f"Project Title: {_['Title']}")
-                            for student_record in my_DB.search('persons').table:
+                            for student_record in my_DB.search(
+                                    'persons').table:
                                 if student_record['ID'] == _['Lead']:
-                                    print(f"Lead: {_['Lead']} {student_record['fist']} {student_record['last']}")
+                                    print(
+                                        f"Lead: {_['Lead']} {student_record['fist']} {student_record['last']}")
                                 if student_record['ID'] == _['Member1']:
-                                    print(f"Member1: {_['Member1']} {student_record['fist']} {student_record['last']}")
+                                    print(
+                                        f"Member1: {_['Member1']} {student_record['fist']} {student_record['last']}")
                                 if student_record['ID'] == _['Member2']:
-                                    print(f"Member2: {_['Member2']} {student_record['fist']} {student_record['last']}")
+                                    print(
+                                        f"Member2: {_['Member2']} {student_record['fist']} {student_record['last']}")
                                 if student_record['ID'] == _['Advisor']:
-                                    print(f"Advisor: {_['Advisor']} {student_record['fist']} {student_record['last']}")
-                if user_input == 'notification':
+                                    print(
+                                        f"Advisor: {_['Advisor']} {student_record['fist']} {student_record['last']}")
+                if user_input == '2':
                     if notification > 0:
                         print('Notifications')
                         for student_record in my_DB.search('request').table:
                             if student_record['MemberID'] == user_id:
                                 for j in my_DB.search('project').table:
                                     counter = 1
-                                    if j['ProjectID'] == student_record['ProjectID']:
-                                        print(f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                    if j['ProjectID'] == student_record[
+                                        'ProjectID']:
+                                        print(
+                                            f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
                                         counter += 1
                     if notification == 0:
                         print("I told you. You don't have any notification"
-                            "haiyaaa...")
+                              "haiyaaa...")
         if not have_project:
             print("Looks like you don't have a project...")
             if notification == 0:
                 print("You don't have any notification.")
             else:
                 print(f"You have {notification} notifications")
-            print("What's on your thoughts?")
-            user_input = input("(create project / notification / exit): ")
-            if user_input == 'create project':
+            print("Select function")
+            print('1. Create project')
+            print('2. Notification')
+            print('Exit')
+            user_input = input("Select number: ")
+            if user_input == '1':
                 create_project()
             if user_input == 'exit':
                 break
-            if user_input == 'notification':
+            if user_input == '2':
                 if notification > 0:
                     print('Notification')
                     for student_record in my_DB.search('request').table:
                         if student_record['MemberID'] == user_id:
                             for j in my_DB.search('project').table:
                                 counter = 1
-                                if j['ProjectID'] == student_record['ProjectID']:
-                                    print(f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                if j['ProjectID'] == student_record[
+                                    'ProjectID']:
+                                    print(
+                                        f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
                                     counter += 1
                 if notification == 0:
                     print("I told you. You don't have any notification la "
-                        "haiyaaa...")
+                          "haiyaaa...")
+
+
 def faculty():
     while True:
         have_project = False
@@ -161,14 +188,100 @@ def faculty():
             if i['MemberID'] == user_id:
                 notification += 1
         if notification == 0:
-                print(f"You don't have any notification")
+            print(f"You don't have any notification")
         else:
             print(f"You have {notification} notifications.")
         # Have project
         if have_project:
             print("Select function: ")
-            user_input = input('d')
-
+            print('1. View every student')
+            print('2. View every project')
+            print('3. Notification')
+            print('4. Response')
+            print('5. View project info')
+            print('exit')
+            user_input = input('Input number: ')
+            if user_input == '1':
+                for student_info in my_DB.search('persons').filter(
+                        lambda x: x['type'] == 'student').table:
+                    print(
+                        f"{student_info['ID']} {student_info['fist']} {student_info['last']}")
+            elif user_input == '2':
+                view_project()
+            elif user_input == '3':
+                if notification > 0:
+                    print('Notifications')
+                    for student_record in my_DB.search('request').table:
+                        if student_record['MemberID'] == user_id:
+                            for j in my_DB.search('project').table:
+                                counter = 1
+                                if j['ProjectID'] == student_record[
+                                    'ProjectID']:
+                                    print(
+                                        f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                    counter += 1
+                if notification == 0:
+                    print("I told you. You don't have any notification"
+                          "haiyaaa...")
+            elif user_input == '4':
+                response_request('faculty')
+                if response_request('student') == '':
+                    print("You don't have any request to response.")
+            elif user_input == '5':
+                for i in my_DB.search('project').table:
+                    if i['ProjectID'] == project_ID:
+                        print(f"Project ID: {i['ProjectID']}")
+                        for j in my_DB.search('persons').table:
+                            if i['Lead'] == j['ID']:
+                                print(f"Lead: {j['ID']} {j['fist']} {j['last']}")
+                        for j in my_DB.search('persons').table:
+                            if i['Member1'] == j['ID']:
+                                print(f": {j['ID']} {j['fist']} {j['last']}")
+                        for j in my_DB.search('persons').table:
+                            if i['Member2'] == j['ID']:
+                                print(f": {j['ID']} {j['fist']} {j['last']}")
+                        for j in my_DB.search('persons').table:
+                            if i['Advisor'] == j['ID']:
+                                print(f": {j['ID']} {j['fist']} {j['last']}")
+            elif user_input == 'exit':
+                break
+            if not have_project:
+                print("Select function: ")
+                print('1. View every student')
+                print('2. View every project')
+                print('3. Notification')
+                print('4. Response')
+                print('5. View project member')
+                print('exit')
+                user_input = input('Input number: ')
+                if user_input == '1':
+                    for student_info in my_DB.search('persons').filter(
+                            lambda x: x['type'] == 'student').table:
+                        print(
+                            f"{student_info['ID']} {student_info['fist']} {student_info['last']}")
+                elif user_input == '2':
+                    view_project()
+                elif user_input == '3':
+                    if notification > 0:
+                        print('Notifications')
+                        for student_record in my_DB.search('request').table:
+                            if student_record['MemberID'] == user_id:
+                                for j in my_DB.search('project').table:
+                                    counter = 1
+                                    if j['ProjectID'] == student_record[
+                                        'ProjectID']:
+                                        print(
+                                            f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                        counter += 1
+                    if notification == 0:
+                        print("I told you. You don't have any notification"
+                              "haiyaaa...")
+                elif user_input == '4':
+                    response_request('faculty')
+                    if response_request('student') == '':
+                        print("You don't have any request to response.")
+                elif user_input == 'exit':
+                    break
 
 
 def response_request(request_type):
@@ -181,25 +294,42 @@ def response_request(request_type):
                             f"{j['ProjectID']} {j['Title']}.")
                 print(f"{_['ProjectID']} {_['Title']}")
         project_id = input("Enter Project ID: ")
-        response = input("What's your response? (Accept/Declined) : ")
+        response = input("What's your response? (accept/decline): ")
         for i in my_DB.search('request').table:
             if i['MemberID'] == user_id and i['ProjectID'] == project_id:
                 i['Response'] = response
+                i[
+                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
             for j in my_DB.search('project').table:
                 if j['ProjectID'] == project_id:
                     if j['Member1'] == '':
                         j['Member1'] = user_id
                     else:
                         j['Member2'] = user_id
+                        return
+
     if request_type == 'faculty':
         project_id = input("Enter Project ID: ")
-        response = input("What's your response?: ")
+        response = input("What's your response? (accept/decline): ")
         for i in my_DB.search('request').table:
             if i['MemberID'] == user_id and i['ProjectID'] == project_id:
                 i['Response'] = response
-            for j in my_DB.search('project').table:
-                if j['ProjectID'] == project_id:
-                    j['advisor'] = user_id
+                i[
+                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
+            if response == 'accept':
+                for j in my_DB.search('project').table:
+                    if j['ProjectID'] == project_id:
+                        j['advisor'] = user_id
+                for project in my_DB.search('project').table:
+                    if project['ProjectID'] == project_id:
+                        project['Status'] = 'Approved'
+                        return
+            if response == 'decline':
+                for project in my_DB.search('project').table:
+                    if project['ProjectID'] == project_id:
+                        project['Status'] = 'Rejected'
+                        return
+    return ''
 
 
 def create_project():
@@ -226,7 +356,8 @@ def create_project():
 
 def invite_user(Project_ID, type_user):
     # ProjectID, to_be_member, Response, Response_date
-    for i in my_DB.search('persons').filter(lambda x: x['type'] == type_user).table:
+    for i in my_DB.search('persons').filter(
+            lambda x: x['type'] == type_user).table:
         print(f"{i['ID']} {i['fist']} {i['last']}")
     member_id = input(f'Enter {type_user} ID: ')
     new_member_request = {}
@@ -243,13 +374,13 @@ def invite_user(Project_ID, type_user):
 
 def edit_project(ID):
     print('What would you like to edit?')
-    edit_input = input('(Title, Member1, Member2) ')
+    edit_input = input('(title, member1, member2) ')
     if edit_input == 'Title' or edit_input == 'title':
         for i in my_DB.search('project').table:
             if i['Lead'] == ID or i['Member1'] == ID or i['Member2'] == ID:
                 i['Title'] = input('Enter new title: ')
                 print('Title changed.')
-    if edit_input == 'Member1':
+    if edit_input == 'member1':
         for student_info in my_DB.search('persons').filter(
                 lambda x: x['type'] == 'student').table:
             print(
@@ -258,7 +389,7 @@ def edit_project(ID):
         for student_record in my_DB.search('project').table:
             if student_record['ProjectID'] == project_ID:
                 student_record['Member1'] = new_member
-    if edit_input == 'Member2':
+    if edit_input == 'member2':
         for student_record in my_DB.search('persons').filter(
                 lambda x: x['type'] == 'student').table:
             print(
@@ -271,6 +402,7 @@ def edit_project(ID):
                     student_record['Member1'] = new_member
     if edit_input == 'exit':
         return
+
 
 def view_student():
     for i in my_DB.search('persons').table:
@@ -291,12 +423,12 @@ def view_member():
         member_checker1 = i['Member1']
         member_checker2 = i['Member2']
         if member_checker1 == '':
-            member_checker1 = 'No one'
+            member_checker1yes = 'No one'
         if member_checker2 == '':
-            member_checker2 = 'No one'
+            member_checker2yes = 'No one'
         if i['ProjectID'] == project_id_input:
             print(
-                f"Lead: {i['Lead']} Member1: {member_checker1} Member2: {member_checker2} ")
+                f"Lead: {i['Lead']} Member1: {member_checker1yes} Member2: {member_checker2yes} ")
             print(f"Advisor: {i['Adviser']} Status: {i['Status']}")
 
 
@@ -337,25 +469,12 @@ def add_remove_project():
                 print('Project Removed')
 
 
-def change_role_or_add_admin():
-    user_input = input('Change role in class or add people to project: ')
-    if user_input == 'class':
-        student_id = input('Enter ID: ')
-        new_role = input('Enter Type: ')
-        for i in my_DB.search('persons').table:
-            if student_id == i['ID']:
-                i['type'] = new_role
-    if user_input == 'project':
-        project_id = input('Enter Project ID: ')
-        student_id = input('Enter Student ID: ')
-        for i in my_DB.search('project').table:
-            if i['ProjectID'] == project_id:
-                if student_id in my_DB.search('project').table.index(i):
-                    print('What role you wanna change it to?')
-                    print("1. Lead")
-                    print("2. Member1")
-                    print("3. Member2")
-
+def change_project_status():
+    user_input = input('Input project ID: ')
+    for i in my_DB.search('project').table:
+        if i['ProjectID'] == user_input:
+            status_input = input('Status: ')
+            i['Status'] = status_input
 
 
 # here are things to do in this function:
@@ -369,6 +488,8 @@ def exit():
     my_DB.write_csv('login.csv', my_DB.search('login').table)
     my_DB.write_csv('project.csv', my_DB.search('project').table)
     my_DB.write_csv('request.csv', my_DB.search('request').table)
+
+
 # here are things to do in this function:
 # write out all the tables that have been modified to the corresponding csv files
 # By now, you know how to read in a csv file and transform it into a list of dictionaries. For this project, you also need to know how to do the reverse, i.e., writing out to a csv file given a list of dictionaries. See the link below for a tutorial on how to do this:
@@ -382,7 +503,8 @@ val = login()
 user_id = val[0]
 project_ID = ''
 for _ in my_DB.search('project').table:
-    if _['Lead'] == user_id or _['Member1'] == user_id or _['Member2'] == user_id:
+    if _['Lead'] == user_id or _['Member1'] == user_id or _[
+        'Member2'] == user_id:
         project_ID = _['ProjectID']
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
@@ -390,16 +512,6 @@ if val[1] == 'admin':
     admin()
 elif val[1] == 'student':
     student()
-
-# see and do student related activities
-# elif val[1] = 'member':
-# see and do member related activities
-# elif val[1] = 'lead':
-# see and do lead related activities
-# elif val[1] = 'faculty':
-# see and do faculty related activities
-# elif val[1] = 'advisor':
-# see and do advisor related activities
-
-# once everything is done, make a call to the exit function
+elif val[1] == 'faculty':
+    faculty()
 exit()
