@@ -51,14 +51,11 @@ class Table:
             just_list1.append(float(item1[keys]))
         return function(just_list1)
 
-    def select(self, attributes_list):
+    def select(self, attribute_list):
         just_list_again = []
         for i in self.table:
-            dict_temp = {}
-            for key in i:
-                if key in attributes_list:
-                    dict_temp[key] = i[key]
-            just_list_again.append(dict_temp)
+            for attribute in attribute_list:
+                just_list_again.append(i[attribute])    
         return just_list_again
 
     def print(self):
@@ -73,13 +70,36 @@ class Table:
 class DB:
     def __init__(self):
         self.database = []
+        self.csv_filename = []
 
-    def insert(self, table):
+    def insert(self, table, file_name):
         self.database.append(table)
+        self.csv_filename.append(file_name)
 
     def search(self, table_name):
         for table in self.database:
             if table.table_name == table_name:
                 return table
         return None
+    
+    def read_csv(self, table_name, file_name):
+        data_list = []
+        with open(os.path.join(__location__, f'{file_name}')) as f:
+            rows = csv.DictReader(f)
+            for r in rows:
+                data_list.append(dict(r))
+        tb = Table(table_name, data_list)
+        self.insert(tb, file_name)
+        return self
+    
+    def write_csv(self):
+        for i,tb in enumerate(self.database):
+            if tb.table.__len__() > 0:
+                with open(os.path.join(__location__, self.csv_filename[i]),'w', newline='') as f:
+                    writer = csv.DictWriter(f, fieldnames=tb.table[0].keys())
+                    writer.writeheader()
+                    for row in tb.table:
+                        writer.writerow(row)
+            return self
+    
 
