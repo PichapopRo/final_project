@@ -1,7 +1,6 @@
 # TODO List 
 
 - Writer : Pichapop Rodduayboon
-- Co-Author: Paruj Ratanaworabhan
 
 
 ### Admin
@@ -21,6 +20,7 @@
 - View Project status
 - Accept or decline project invitations from students
 - Accept or decline project requests
+- After accepting project request the userID will be added as advisor in that project
 - Logout
 
 ### Student
@@ -31,6 +31,13 @@
 - Send request to the advisor
 - Accept or decline project invitation
 - Submit project
+- Invite other members
+- Give members workload
+- Change workload status
+- View every member in the project
+- View workload that have been assign to a specific member
+- Lead can view every workload
+- Exit the system
 
 ## System Functionality
 

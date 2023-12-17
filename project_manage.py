@@ -282,6 +282,7 @@ def faculty():
             print('5. View project info')
             print('6. View every workload')
             print('7. Create Grading field')
+            print('8. Change project status')
             print('exit')
             user_input = input('Input number: ')
             if user_input == '1':
@@ -333,6 +334,8 @@ def faculty():
                 view_workload()
             elif user_input == '7':
                 create_grading()
+            elif user_input == '8':
+                change_project_status_advisor()
             else:
                 print('Invalid input.')
             if not have_project:
@@ -418,15 +421,6 @@ def response_request(request_type):
                 for j in my_DB.search('project').table:
                     if j['ProjectID'] == project_id:
                         j['advisor'] = user_id
-                for project in my_DB.search('project').table:
-                    if project['ProjectID'] == project_id:
-                        project['Status'] = 'Approved'
-                        return
-            if response == 'decline':
-                for project in my_DB.search('project').table:
-                    if project['ProjectID'] == project_id:
-                        project['Status'] = 'Rejected'
-                        return
     return ''
 
 
@@ -576,6 +570,18 @@ def change_project_status():
         if i['ProjectID'] == user_input:
             status_input = input('Status: ')
             i['Status'] = status_input
+
+
+# change project status function for advisor
+def change_project_status_advisor():
+    for i in my_DB.search('project').table:
+        if i['ProjectID'] == project_ID:
+            while True:
+                status_input = input('Status (Reviewing / Approved): ')
+                if status_input == 'Reviewing' or status_input == 'Approved' or status_input == 'In process':
+                    break
+            i['Status'] = status_input
+
 
 
 # workload giver for lead student
