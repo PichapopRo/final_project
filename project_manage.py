@@ -273,6 +273,7 @@ def faculty():
             print('4. Response')
             print('5. View project info')
             print('6. View every workload')
+            print('7. Create Grading field')
             print('exit')
             user_input = input('Input number: ')
             if user_input == '1':
@@ -322,14 +323,17 @@ def faculty():
                 break
             elif user_input == '6':
                 view_workload()
+            elif user_input == '7':
+                create_grading()
+            else:
+                print('Invalid input.')
             if not have_project:
                 print("Select function: ")
                 print('1. View every student')
                 print('2. View every project')
                 print('3. Notification')
                 print('4. Response')
-                print('5. Create grading field')
-                print('6. Grading')
+                print('5. Grading')
                 print('exit')
                 user_input = input('Input number: ')
                 if user_input == '1':
@@ -361,8 +365,6 @@ def faculty():
                 elif user_input == 'exit':
                     break
                 elif user_input == '5':
-                    create_grading()
-                elif user_input == '6':
                     grading()
 
 
@@ -382,8 +384,10 @@ def response_request(request_type):
                             if (i['MemberID'] == user_id and
                                     i['ProjectID'] == project_id):
                                 i['Response'] = response
-                                i[
-                                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
+                                i['Response_date'] = (
+                                    f'{time_atm.strftime("%d")}'
+                                    f' {time_atm.strftime("%b")}'
+                                    f' {time_atm.strftime("%Y")}')
                             for j in my_DB.search('project').table:
                                 if j['ProjectID'] == project_id:
                                     if j['Member1'] == '':
@@ -398,8 +402,9 @@ def response_request(request_type):
         for i in my_DB.search('request').table:
             if i['MemberID'] == user_id and i['ProjectID'] == project_id:
                 i['Response'] = response
-                i[
-                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
+                i['Response_date'] = (f'{time_atm.strftime("%d")} '
+                                      f'{time_atm.strftime("%b")} '
+                                      f'{time_atm.strftime("%Y")}')
             if response == 'accept':
                 for j in my_DB.search('project').table:
                     if j['ProjectID'] == project_id:
@@ -417,7 +422,6 @@ def response_request(request_type):
 
 
 def create_project():
-    # ProjectID, Title, Lead, Member1, Member2, Advisor, Status
     new_project = {}
     new_project['ProjectID'] = str(random.randint(1111111, 9999999))
     new_project['Title'] = input("Enter Project's name: ")
@@ -616,16 +620,8 @@ def view_project_workload():
 
 def create_grading():
     graded_project = {}
-    for i in my_DB.search('project').table:
-        print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
-    while True:
-        project_input = input('Input project ID: ')
-        if project_input in my_DB.search('project').select(['ProjectID']):
-            break
-        else:
-            print('Invalid ID.')
     # ProjectID,examiner1,examiner2,examiner3,score1,score2,score3,total
-    graded_project['ProjectID'] = project_input
+    graded_project['ProjectID'] = project_ID
     graded_project['examiner1'] = ''
     graded_project['examiner2'] = ''
     graded_project['examiner3'] = ''
@@ -634,6 +630,7 @@ def create_grading():
     graded_project['score3'] = 0
     graded_project['total'] = ''
     my_DB.search('grading').table.append(graded_project)
+    print('Grading field created.')
 
 
 def grading():
@@ -710,7 +707,7 @@ def add_advisor():
                     print(f"{j['ID']} {j['fist']} {j['last']}")
                 member_id = input('Enter faculty ID: ')
                 if i['Advisor'] == '':
-                    i['Advior'] = member_id
+                    i['Advisor'] = member_id
             else:
                 print('This project already had an advisor.')
 
