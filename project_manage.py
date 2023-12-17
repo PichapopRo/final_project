@@ -1,4 +1,4 @@
-# import database module
+# import module
 import database
 import random
 import time
@@ -8,6 +8,7 @@ my_DB = database.DB()
 time_atm = datetime.datetime.now()
 
 
+# define initializing
 def initializing():
     my_DB.read_csv('persons', 'persons.csv')
     my_DB.read_csv('login', 'login.csv')
@@ -17,6 +18,7 @@ def initializing():
     my_DB.read_csv('grading', 'grading.csv')
 
 
+# define login function
 def login():
     print('Enter your username and password.')
     username = input('Enter Username: ')
@@ -31,6 +33,7 @@ def login():
     return None
 
 
+# Admin function for admin role
 def admin():
     print('/help to view every commands')
     while True:
@@ -65,6 +68,7 @@ def admin():
             print('Invalid input')
 
 
+# student function for student role
 def student():
     while True:
         have_project = False
@@ -82,6 +86,7 @@ def student():
             else:
                 print(f"You have {notification} notifications.")
             for j in my_DB.search('project').table:
+                # Checking for Lead
                 if j['Lead'] == user_id:
                     print("Select function")
                     print('1. Edit')
@@ -148,6 +153,7 @@ def student():
                                             f"{student_record['fist']} "
                                             f"{student_record['last']}")
                     elif user_input == '2':
+                        # Notification system
                         if notification > 0:
                             print('Notifications')
                             for student_record in my_DB.search(
@@ -251,10 +257,12 @@ def student():
                 response_request('student')
 
 
+# faculty function for faculty role
 def faculty():
     while True:
         have_project = False
         notification = 0
+        # Searching for project
         if user_id in my_DB.search('project').select(['Advisor']):
             have_project = True
         for i in my_DB.search('request').table:
@@ -368,6 +376,7 @@ def faculty():
                     grading()
 
 
+# Response function
 def response_request(request_type):
     if request_type == 'student':
         for _ in my_DB.search('request').table:
@@ -395,7 +404,7 @@ def response_request(request_type):
                                     else:
                                         j['Member2'] = user_id
                                         return
-
+    # Function response for faculty
     if request_type == 'faculty':
         project_id = input("Enter Project ID: ")
         response = input("What's your response? (accept/decline): ")
@@ -421,6 +430,7 @@ def response_request(request_type):
     return ''
 
 
+# create project for student
 def create_project():
     new_project = {}
     new_project['ProjectID'] = str(random.randint(1111111, 9999999))
@@ -442,6 +452,7 @@ def create_project():
     print("Project Created.")
 
 
+# global invite user function
 def invite_user(Project_ID, type_user):
     # ProjectID, to_be_member, Response, Response_date
     for i in my_DB.search('persons').filter(
@@ -460,6 +471,7 @@ def invite_user(Project_ID, type_user):
     my_DB.search('request').table.append(new_member_request)
 
 
+# edit project function for lead
 def edit_project(ID):
     print('What would you like to edit?')
     edit_input = input('(title, member1, member2) ')
@@ -492,12 +504,14 @@ def edit_project(ID):
         return
 
 
+# view student for admin and faculty
 def view_student():
     for i in my_DB.search('persons').table:
         print(
             f"ID: {i['ID']} Fullname: {i['fist']} {i['last']} Type: {i['type']}")
 
 
+# view project for admin and faculty
 def view_project():
     num_project = 1
     for i in my_DB.search('project').table:
@@ -505,6 +519,7 @@ def view_project():
         num_project += 1
 
 
+# view member for lead, member, faculty and admin
 def view_member():
     project_id_input = input('Enter Project ID: ')
     for i in my_DB.search('project').table:
@@ -514,6 +529,7 @@ def view_member():
             print(f"Advisor: {i['Adviser']} Status: {i['Status']}")
 
 
+# add or remove student for admin
 def add_remove_student():
     user_add_remove = input('add or remove: ')
     if user_add_remove == 'remove':
@@ -538,6 +554,7 @@ def add_remove_student():
         print("Student Added.")
 
 
+# remove project function for admin
 def remove_project():
     while True:
         remove_id = input('Enter Project ID: ')
@@ -552,6 +569,7 @@ def remove_project():
             print('Project Removed')
 
 
+# change project status function for admin
 def change_project_status():
     user_input = input('Input project ID: ')
     for i in my_DB.search('project').table:
@@ -560,6 +578,7 @@ def change_project_status():
             i['Status'] = status_input
 
 
+# workload giver for lead student
 def workload_giver():
     new_workload = {}
     new_workload['ProjectID'] = project_ID
@@ -587,6 +606,7 @@ def workload_giver():
     new_workload['Status'] = 'Assigned'
 
 
+# Change work status for member
 def change_workload_status():
     for i in my_DB.search('workload').table:
         if i['ProjectID'] == project_ID and i['Handler'] == user_id:
@@ -596,6 +616,7 @@ def change_workload_status():
             print("Work not found.")
 
 
+# view workload specific workload for user
 def view_workload():
     if len(my_DB.search('workload').table) > 0:
         for i in my_DB.search('workload').table:
@@ -607,6 +628,7 @@ def view_workload():
         print('Congrats! There are no work for you.')
 
 
+# view every workload in the project
 def view_project_workload():
     for i in my_DB.search('workload').table:
         if i['ProjectID'] == project_ID:
@@ -618,6 +640,7 @@ def view_project_workload():
             print('There are no work that have been assigned.')
 
 
+# create grading field for advisor (only advisor can create grading field)
 def create_grading():
     graded_project = {}
     # ProjectID,examiner1,examiner2,examiner3,score1,score2,score3,total
@@ -633,6 +656,7 @@ def create_grading():
     print('Grading field created.')
 
 
+# grading function for user with faculty role to grade the project
 def grading():
     for i in my_DB.search('grading').table:
         for j in my_DB.search('project'):
@@ -668,6 +692,7 @@ def grading():
         i['total'] = f'{sum(total_calculation) / len(total_calculation):.2f}'
 
 
+# add project member for admin
 def add_member_admin():
     for i in my_DB.search('project').table:
         print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
@@ -691,6 +716,7 @@ def add_member_admin():
                 print('Member full.')
 
 
+# add advisor to the project for admin
 def add_advisor():
     for i in my_DB.search('project').table:
         print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
@@ -712,6 +738,7 @@ def add_advisor():
                 print('This project already had an advisor.')
 
 
+# exit function write down all the info to the csv file
 def exit():
     my_DB.write_csv('persons.csv', my_DB.search('persons').table)
     my_DB.write_csv('login.csv', my_DB.search('login').table)
@@ -721,6 +748,7 @@ def exit():
     my_DB.write_csv('grading.csv', my_DB.search('grading').table)
 
 
+# main part
 initializing()
 val = login()
 while val is None:
