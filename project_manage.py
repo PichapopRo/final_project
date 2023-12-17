@@ -14,6 +14,7 @@ def initializing():
     my_DB.read_csv('project', 'project.csv')
     my_DB.read_csv('request', 'request.csv')
     my_DB.read_csv('workload', 'workload.csv')
+    my_DB.read_csv('grading', 'grading.csv')
 
 
 # here are things to do in this function:
@@ -325,7 +326,8 @@ def faculty():
                 print('2. View every project')
                 print('3. Notification')
                 print('4. Response')
-                print('5. View project member')
+                print('5. Create grading field')
+                print('6. Grading')
                 print('exit')
                 user_input = input('Input number: ')
                 if user_input == '1':
@@ -356,6 +358,10 @@ def faculty():
                         print("You don't have any request to response.")
                 elif user_input == 'exit':
                     break
+                elif user_input == '5':
+                    create_grading()
+                elif user_input == '6':
+                    grading()
 
 
 def response_request(request_type):
@@ -603,9 +609,63 @@ def view_project_workload():
             print('There are no work that have been assigned.')
 
 
-def
+def create_grading():
+    graded_project = {}
+    for i in my_DB.search('project').table:
+        print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
+    while True:
+        project_input = input('Input project ID: ')
+        if project_input in my_DB.search('project').select(['ProjectID']):
+            break
+        else:
+            print('Invalid ID.')
+    # ProjectID,examiner1,examiner2,examiner3,score1,score2,score3,total
+    graded_project['ProjectID'] = project_input
+    graded_project['examiner1'] = ''
+    graded_project['examiner2'] = ''
+    graded_project['examiner3'] = ''
+    graded_project['score1'] = 0
+    graded_project['score2'] = 0
+    graded_project['score3'] = 0
+    graded_project['total'] = ''
+    my_DB.search('grading').table.append(graded_project)
 
-
+def grading():
+    for i in my_DB.search('grading').table:
+        for j in my_DB.search('project'):
+            if j['ProjectID'] == i['ProjectID']:
+                print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
+    while True:
+        user_input = input('Input project ID: ')
+        if user_input in my_DB.search('grading').select(['ProjectID']):
+            break
+    for i in my_DB.search('grading').table:
+        if i['ProjectID'] == project_ID:
+            if i['examiner1'] == '':
+                i['examiner1'] = user_id
+            if i['examiner2'] == '':
+                i['examiner2'] = user_id
+            if i['examiner3'] == '':
+                i['examiner3'] = user_id
+    while True:
+        score_input = int(input('Input score (0-100): '))
+        if 0 < score_input <= 100:
+            break
+        else:
+            print('Invalid score')
+    for i in my_DB.search('grading').table:
+        if i['ProjectID'] == project_ID:
+            if i['score1'] == 0:
+                i['score1'] = score_input
+            if i['score2'] == 0:
+                i['score2'] = score_input
+            if i['score3'] == 0:
+                i['score3'] = score_input
+        total_calculation = []
+        total_calculation.append(i['score1'])
+        total_calculation.append(i['score2'])
+        total_calculation.append(i['score3'])
+        i['total'] = f'{sum(total_calculation)/len(total_calculation):.2f}'
 # here are things to do in this function:
 # add code that performs a login task
 # ask a user for a username and password
@@ -618,7 +678,7 @@ def exit():
     my_DB.write_csv('project.csv', my_DB.search('project').table)
     my_DB.write_csv('request.csv', my_DB.search('request').table)
     my_DB.write_csv('workload.csv', my_DB.search('workload').table)
-
+    my_DB.write_csv('grading.csv', my_DB.search('grading').table)
 
 # here are things to do in this function:
 # write out all the tables that have been modified to the corresponding csv files
