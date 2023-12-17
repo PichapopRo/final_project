@@ -96,7 +96,7 @@ class DB:
     def write_csv(self, name, list_dict):
         if not list_dict:
             with open(name, 'w', newline='', encoding='utf-8') as myFile:
-                return  # replace with nothing
+                return
         with open(name, 'w', newline='', encoding='utf-8') as myFile:
             writer = csv.writer(myFile)
             row = [x for x in list_dict[0].keys()]
