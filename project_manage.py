@@ -17,32 +17,18 @@ def initializing():
     my_DB.read_csv('grading', 'grading.csv')
 
 
-# here are things to do in this function:
-
-# create an object to read all csv files that will serve as a persistent state for this program
-
-# create all the corresponding tables for those csv files
-
-# see the guide how many tables are needed
-
-# add all these tables to the database
-
-
-# define a function called login
-
 def login():
-    while True:
-        print('Enter your username and password.')
-        username = input('Enter Username: ')
-        password = input('Enter your password: ')
-        for i in my_DB.search('login').table:
-            if i['username'] == username and i['password'] == password:
-                print(
-                    f"Hello, {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['fist']}"
-                    f" {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['last']}")
-                return i['ID'], i['role']
-        print('Invalid username or password.')
-        return None
+    print('Enter your username and password.')
+    username = input('Enter Username: ')
+    password = input('Enter your password: ')
+    for i in my_DB.search('login').table:
+        if i['username'] == username and i['password'] == password:
+            print(
+                f"Hello, {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['fist']}"
+                f" {my_DB.search('persons').table[my_DB.search('login').table.index(i)]['last']}")
+            return i['ID'], i['role']
+    print('Invalid username or password.')
+    return None
 
 
 def admin():
@@ -58,6 +44,8 @@ def admin():
             print('4. Changes project status')
             print('5. Add student or remove student')
             print('6. Remove project')
+            print('7. Add member to project')
+            print('8. Add advisor')
             print('Type exit to exit')
         if user_input == '1':
             view_student()
@@ -71,13 +59,19 @@ def admin():
             add_remove_student()
         elif user_input == '6':
             remove_project()
+        elif user_input == '7':
+            add_member_admin()
+        else:
+            print('Invalid input')
 
 
 def student():
     while True:
         have_project = False
         notification = 0
-        if user_id in my_DB.search('project').select(['Lead']) or user_id in my_DB.search('project').select(['Member1']) or my_DB.search('project').select(['Member2']):
+        if user_id in my_DB.search('project').select(
+                ['Lead']) or user_id in my_DB.search('project').select(
+            ['Member1']) or my_DB.search('project').select(['Member2']):
             have_project = True
         for student_record in my_DB.search('request').table:
             if student_record['MemberID'] == user_id:
@@ -135,16 +129,24 @@ def student():
                                         'persons').table:
                                     if student_record['ID'] == _['Lead']:
                                         print(
-                                            f"Lead: {_['Lead']} {student_record['fist']} {student_record['last']}")
+                                            f"Lead: {_['Lead']} "
+                                            f"{student_record['fist']} "
+                                            f"{student_record['last']}")
                                     if student_record['ID'] == _['Member1']:
                                         print(
-                                            f"Member1: {_['Member1']} {student_record['fist']} {student_record['last']}")
+                                            f"Member1: {_['Member1']} "
+                                            f"{student_record['fist']} "
+                                            f"{student_record['last']}")
                                     if student_record['ID'] == _['Member2']:
                                         print(
-                                            f"Member2: {_['Member2']} {student_record['fist']} {student_record['last']}")
+                                            f"Member2: {_['Member2']} "
+                                            f"{student_record['fist']} "
+                                            f"{student_record['last']}")
                                     if student_record['ID'] == _['Advisor']:
                                         print(
-                                            f"Advisor: {_['Advisor']} {student_record['fist']} {student_record['last']}")
+                                            f"Advisor: {_['Advisor']} "
+                                            f"{student_record['fist']} "
+                                            f"{student_record['last']}")
                     elif user_input == '2':
                         if notification > 0:
                             print('Notifications')
@@ -377,9 +379,11 @@ def response_request(request_type):
                         response = input(
                             "What's your response? (accept/decline): ")
                         for i in my_DB.search('request').table:
-                            if i['MemberID'] == user_id and i['ProjectID'] == project_id:
+                            if (i['MemberID'] == user_id and
+                                    i['ProjectID'] == project_id):
                                 i['Response'] = response
-                                i['Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
+                                i[
+                                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
                             for j in my_DB.search('project').table:
                                 if j['ProjectID'] == project_id:
                                     if j['Member1'] == '':
@@ -394,7 +398,8 @@ def response_request(request_type):
         for i in my_DB.search('request').table:
             if i['MemberID'] == user_id and i['ProjectID'] == project_id:
                 i['Response'] = response
-                i['Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
+                i[
+                    'Response_date'] = f'{time_atm.strftime("%d")} {time_atm.strftime("%b")} {time_atm.strftime("%Y")}'
             if response == 'accept':
                 for j in my_DB.search('project').table:
                     if j['ProjectID'] == project_id:
@@ -630,6 +635,7 @@ def create_grading():
     graded_project['total'] = ''
     my_DB.search('grading').table.append(graded_project)
 
+
 def grading():
     for i in my_DB.search('grading').table:
         for j in my_DB.search('project'):
@@ -661,17 +667,54 @@ def grading():
                 i['score2'] = score_input
             if i['score3'] == 0:
                 i['score3'] = score_input
-        total_calculation = []
-        total_calculation.append(i['score1'])
-        total_calculation.append(i['score2'])
-        total_calculation.append(i['score3'])
-        i['total'] = f'{sum(total_calculation)/len(total_calculation):.2f}'
-# here are things to do in this function:
-# add code that performs a login task
-# ask a user for a username and password
-# returns [ID, role] if valid, otherwise returning None
+        total_calculation = [i['score1'], i['score2'], i['score3']]
+        i['total'] = f'{sum(total_calculation) / len(total_calculation):.2f}'
 
-# define a function called exit
+
+def add_member_admin():
+    for i in my_DB.search('project').table:
+        print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
+    while True:
+        project_input = input('Enter project ID: ')
+        if project_input in my_DB.search('project').select(['ProjectID']):
+            break
+        print('Invalid Project ID')
+    for i in my_DB.search('project').table:
+        if i['ProjectID'] == project_input:
+            if i['Member1'] == '' or i['Member2'] == '':
+                for j in my_DB.search('persons').filter(
+                        lambda x: x['type'] == 'student').table:
+                    print(f"{j['ID']} {j['fist']} {j['last']}")
+                member_id = input('Enter student ID: ')
+                if i['Member1'] == '':
+                    i['Member1'] = member_id
+                elif i['Member2'] == '':
+                    i['Member2'] = member_id
+            else:
+                print('Member full.')
+
+
+def add_advisor():
+    for i in my_DB.search('project').table:
+        print(f"Project ID: {i['ProjectID']} Title: {i['Title']}")
+    while True:
+        project_input = input('Enter project ID: ')
+        if project_input in my_DB.search('project').select(['ProjectID']):
+            break
+        print('Invalid Project ID')
+    for i in my_DB.search('project').table:
+        if i['ProjectID'] == project_input:
+            if i['Advisor'] == '':
+                for j in my_DB.search('persons').filter(
+                        lambda x: x['type'] == 'faculty').table:
+                    print(f"{j['ID']} {j['fist']} {j['last']}")
+                member_id = input('Enter faculty ID: ')
+                if i['Advisor'] == '':
+                    i['Advior'] = member_id
+            else:
+                print('This project already had an advisor.')
+
+
 def exit():
     my_DB.write_csv('persons.csv', my_DB.search('persons').table)
     my_DB.write_csv('login.csv', my_DB.search('login').table)
@@ -680,14 +723,7 @@ def exit():
     my_DB.write_csv('workload.csv', my_DB.search('workload').table)
     my_DB.write_csv('grading.csv', my_DB.search('grading').table)
 
-# here are things to do in this function:
-# write out all the tables that have been modified to the corresponding csv files
-# By now, you know how to read in a csv file and transform it into a list of dictionaries. For this project, you also need to know how to do the reverse, i.e., writing out to a csv file given a list of dictionaries. See the link below for a tutorial on how to do this:
 
-# https://www.pythonforbeginners.com/basics/list-of-dictionaries-to-csv-in-python
-
-
-# make calls to the initializing and login functions defined above
 initializing()
 val = login()
 while val is None:
@@ -698,7 +734,6 @@ for _ in my_DB.search('project').table:
     if (_['Lead'] == user_id or _['Member1'] == user_id or _['Member2']
             == user_id or _['Advisor'] == user_id):
         project_ID = _['ProjectID']
-# based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
 if val[1] == 'admin':
     admin()
