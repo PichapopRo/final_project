@@ -81,6 +81,7 @@ def student():
             if student_record['MemberID'] == user_id:
                 notification += 1
         if have_project:
+            print('--------------------------------------')
             if notification == 0:
                 print(f"You don't have any notification")
             else:
@@ -223,6 +224,7 @@ def student():
                                   "haiyaaa...")
 
         if not have_project:
+            print('--------------------------------------')
             print("Looks like you don't have a project...")
             if notification == 0:
                 print("You don't have any notification.")
@@ -262,27 +264,97 @@ def faculty():
     while True:
         have_project = False
         notification = 0
-        # Searching for project
-        if user_id in my_DB.search('project').select(['Advisor']):
+        if user_id in my_DB.search('project').select(
+                ['Advisor']):
             have_project = True
-        for i in my_DB.search('request').table:
-            if i['MemberID'] == user_id:
+        for faculty_record in my_DB.search('request').table:
+            if faculty_record['MemberID'] == user_id:
                 notification += 1
-        if notification == 0:
-            print(f"You don't have any notification")
-        else:
-            print(f"You have {notification} notifications.")
-        # Have project
         if have_project:
+            print('--------------------------------------')
+            if notification == 0:
+                print(f"You don't have any notification")
+            else:
+                print(f"You have {notification} notifications.")
+            for j in my_DB.search('project').table:
+                # Checking for Advisor
+                if j['Advisor'] == user_id:
+                    print("Select function: ")
+                    print('1. View every student')
+                    print('2. View every project')
+                    print('3. Notification')
+                    print('4. Response')
+                    print('5. View project info')
+                    print('6. View every workload')
+                    print('7. Create Grading field')
+                    print('8. Change project status')
+                    print('exit')
+                    user_input = input('Input number: ')
+                    if user_input == '1':
+                        for student_info in my_DB.search('persons').filter(
+                                lambda x: x['type'] == 'student').table:
+                            print(
+                                f"{student_info['ID']} {student_info['fist']} {student_info['last']}")
+                    elif user_input == '2':
+                        view_project()
+                    elif user_input == '3':
+                        if notification > 0:
+                            print('Notifications')
+                            for student_record in my_DB.search('request').table:
+                                if student_record['MemberID'] == user_id:
+                                    for j in my_DB.search('project').table:
+                                        counter = 1
+                                        if j['ProjectID'] == student_record[
+                                            'ProjectID']:
+                                            print(
+                                                f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
+                                            counter += 1
+                        if notification == 0:
+                            print("I told you. You don't have any notification"
+                                  " haiyaaa...")
+                    elif user_input == '4':
+                        response_request('faculty')
+                        if response_request('student') == '':
+                            print("You don't have any request to response.")
+                    elif user_input == '5':
+                        for i in my_DB.search('project').table:
+                            if i['ProjectID'] == project_ID:
+                                print(f"Project ID: {i['ProjectID']}")
+                                for j in my_DB.search('persons').table:
+                                    if i['Lead'] == j['ID']:
+                                        print(
+                                            f"Lead: {j['ID']} {j['fist']} {j['last']}")
+                                for j in my_DB.search('persons').table:
+                                    if i['Member1'] == j['ID']:
+                                        print(f": {j['ID']} {j['fist']} {j['last']}")
+                                for j in my_DB.search('persons').table:
+                                    if i['Member2'] == j['ID']:
+                                        print(f": {j['ID']} {j['fist']} {j['last']}")
+                                for j in my_DB.search('persons').table:
+                                    if i['Advisor'] == j['ID']:
+                                        print(f": {j['ID']} {j['fist']} {j['last']}")
+                    elif user_input == 'exit':
+                        break
+                    elif user_input == '6':
+                        view_workload()
+                    elif user_input == '7':
+                        create_grading()
+                    elif user_input == '8':
+                        change_project_status_advisor()
+                    else:
+                        print('Invalid input.')
+        if not have_project:
+            print('--------------------------------------')
+            if notification == 0:
+                print(f"You don't have any notification")
+            else:
+                print(f"You have {notification} notifications.")
             print("Select function: ")
             print('1. View every student')
             print('2. View every project')
             print('3. Notification')
             print('4. Response')
-            print('5. View project info')
-            print('6. View every workload')
-            print('7. Create Grading field')
-            print('8. Change project status')
+            print('5. Grading')
             print('exit')
             user_input = input('Input number: ')
             if user_input == '1':
@@ -311,72 +383,10 @@ def faculty():
                 response_request('faculty')
                 if response_request('student') == '':
                     print("You don't have any request to response.")
-            elif user_input == '5':
-                for i in my_DB.search('project').table:
-                    if i['ProjectID'] == project_ID:
-                        print(f"Project ID: {i['ProjectID']}")
-                        for j in my_DB.search('persons').table:
-                            if i['Lead'] == j['ID']:
-                                print(
-                                    f"Lead: {j['ID']} {j['fist']} {j['last']}")
-                        for j in my_DB.search('persons').table:
-                            if i['Member1'] == j['ID']:
-                                print(f": {j['ID']} {j['fist']} {j['last']}")
-                        for j in my_DB.search('persons').table:
-                            if i['Member2'] == j['ID']:
-                                print(f": {j['ID']} {j['fist']} {j['last']}")
-                        for j in my_DB.search('persons').table:
-                            if i['Advisor'] == j['ID']:
-                                print(f": {j['ID']} {j['fist']} {j['last']}")
             elif user_input == 'exit':
                 break
-            elif user_input == '6':
-                view_workload()
-            elif user_input == '7':
-                create_grading()
-            elif user_input == '8':
-                change_project_status_advisor()
-            else:
-                print('Invalid input.')
-            if not have_project:
-                print("Select function: ")
-                print('1. View every student')
-                print('2. View every project')
-                print('3. Notification')
-                print('4. Response')
-                print('5. Grading')
-                print('exit')
-                user_input = input('Input number: ')
-                if user_input == '1':
-                    for student_info in my_DB.search('persons').filter(
-                            lambda x: x['type'] == 'student').table:
-                        print(
-                            f"{student_info['ID']} {student_info['fist']} {student_info['last']}")
-                elif user_input == '2':
-                    view_project()
-                elif user_input == '3':
-                    if notification > 0:
-                        print('Notifications')
-                        for student_record in my_DB.search('request').table:
-                            if student_record['MemberID'] == user_id:
-                                for j in my_DB.search('project').table:
-                                    counter = 1
-                                    if j['ProjectID'] == student_record[
-                                        'ProjectID']:
-                                        print(
-                                            f"{counter}. {j['ProjectID']} {j['Title']} project have invited you to join.")
-                                        counter += 1
-                    if notification == 0:
-                        print("I told you. You don't have any notification"
-                              "haiyaaa...")
-                elif user_input == '4':
-                    response_request('faculty')
-                    if response_request('student') == '':
-                        print("You don't have any request to response.")
-                elif user_input == 'exit':
-                    break
-                elif user_input == '5':
-                    grading()
+            elif user_input == '5':
+                grading()
 
 
 # Response function
@@ -515,6 +525,8 @@ def view_project():
 
 # view member for lead, member, faculty and admin
 def view_member():
+    for j in my_DB.search('project').table:
+        print(f"{j['ProjectID']} {j['Title']}")
     project_id_input = input('Enter Project ID: ')
     for i in my_DB.search('project').table:
         if i['ProjectID'] == project_id_input:
@@ -581,7 +593,6 @@ def change_project_status_advisor():
                 if status_input == 'Reviewing' or status_input == 'Approved' or status_input == 'In process':
                     break
             i['Status'] = status_input
-
 
 
 # workload giver for lead student
